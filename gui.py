@@ -12,6 +12,7 @@ style.configure('small.TLabel', font=('Helvetica', 7))
 #Funtions to display each page.
 #First page is the login page
 def DisplayLogin():
+    CleanScreen()
 
     #Setup the outer frame for the login page
     loginFrame = ttk.Frame(root, padding="3 3 12 12")
@@ -47,20 +48,29 @@ def DisplayLogin():
     loginFrame.rowconfigure(6, minsize=30)
 
     #Setup all of the necessary widgets
-    logo = ttk.Label(loginFrame, text='Cool Logo (need image)').grid(column=3,row=0)
-    title = ttk.Label(loginFrame, text='Sign In').grid(column=3, row=1)
-    idLabel = ttk.Label(loginFrame, text="Employee ID").grid(column=2, sticky=W)
-    idEntry = ttk.Entry(loginFrame, textvariable='employeeID').grid(column=2, columnspan=3, sticky=(W, E))
-    pssLabel = ttk.Label(loginFrame, text="Password").grid(column=2, sticky=W)
-    pssEntry = ttk.Entry(loginFrame, textvariable="password").grid(column=2, columnspan=3, sticky=(W, E))
-    login = Button(loginFrame, text="Login", bg='blue', fg='white', font=('Helvetica', 10), command=Login).grid(column=4, sticky=E)
+    logo = ttk.Label(loginFrame, text='Cool Logo (need image)')
+    logo.grid(column=3,row=0)
+    title = ttk.Label(loginFrame, text='Sign In')
+    title.grid(column=3, row=1)
+    idLabel = ttk.Label(loginFrame, text="Employee ID")
+    idLabel.grid(column=2, sticky=W)
+    idEntry = ttk.Entry(loginFrame, textvariable='employeeID')
+    idEntry.grid(column=2, columnspan=3, sticky=(W, E))
+    pssLabel = ttk.Label(loginFrame, text="Password")
+    pssLabel.grid(column=2, sticky=W)
+    pssEntry = ttk.Entry(loginFrame, textvariable="password")
+    pssEntry.grid(column=2, columnspan=3, sticky=(W, E))
+    login = Button(loginFrame, text="Login", bg='blue', fg='white', font=('Helvetica', 10), command=Login)
+    login.grid(column=4, sticky=E)
 
-    #add minimum padding to all of the widgets
-    for child in loginFrame.winfo_children():
-        child.grid_configure(padx=5, pady=5)
+    PadSpace()
 
 #Second page is employee info
 def EmployeeInfo():
+    CleanScreen()
+
+    NavigationBar(0)
+
     #main frame for employee info page
     employeeFrame = ttk.Frame(root, padding="3 3 12 12")
     employeeFrame.grid(column=2, row=1, columnspan=3, rowspan=3)
@@ -68,66 +78,141 @@ def EmployeeInfo():
     employeeFrame['relief'] = GROOVE
     for i in range(9):
         employeeFrame.columnconfigure(i, minsize=30)
+    for i in range(13):
         employeeFrame.rowconfigure(i, minsize=30)
 
     #setup the widgets
-    title = ttk.Label(employeeFrame, text='Employee').grid(column=4, row=0)
-    sep1 = ttk.Separator(employeeFrame, orient=HORIZONTAL).grid(column=1, columnspan=7, row=1, sticky=(W, E))
+    title = ttk.Label(employeeFrame, text='Employee')
+    title.grid(column=5, row=0)
+    sep1 = ttk.Separator(employeeFrame, orient=HORIZONTAL)
+    sep1.grid(column=1, columnspan=7, row=1, sticky=(W, E))
 
-    empNameLabel = ttk.Label(employeeFrame, text='Name').grid(column=1, row=2, sticky=W)
-    empNameEntry = ttk.Entry(employeeFrame, textvariable='employeeName').grid(column=1, row=3, columnspan=3, sticky=W)
+    empNameLabel = ttk.Label(employeeFrame, text='Name')
+    empNameLabel.grid(column=1, row=2, sticky=W)
+    empNameEntry = ttk.Entry(employeeFrame, textvariable='employeeName')
+    empNameEntry.grid(column=1, row=3, columnspan=3, sticky=W)
 
-    empAddressLabel = ttk.Label(employeeFrame, text='Address').grid(column=1, row=4, sticky=W)
-    empStreetLabel = ttk.Label(employeeFrame, text='Street Address', style='small.TLabel').grid(column=1, row=5, sticky=W)
-    empStreetEntry = ttk.Entry(employeeFrame, textvariable='employeeStreet').grid(column=1, row=6, columnspan=3, sticky=W)
-    empCityLabel = ttk.Label(employeeFrame, text='City', style='small.TLabel').grid(column=4, row=5, sticky=W)
-    empCityEntry = ttk.Entry(employeeFrame, textvariable='employeeCity').grid(column=4, row=6, columnspan=2, sticky=W)
-    empStateLabel = ttk.Label(employeeFrame, text='State', style='small.TLabel').grid(column=6, row=5, sticky=W)
-    empStateEntry = ttk.Entry(employeeFrame, textvariable='employeeCity').grid(column=6, row=6, sticky=W)
-    empZipLabel = ttk.Label(employeeFrame, text='Zip Code', style='small.TLabel').grid(column=7, row=5, sticky=W)
-    empZipEntry = ttk.Entry(employeeFrame, textvariable='employeeZip').grid(column=7, row=6, sticky=W)
+    empAddressLabel = ttk.Label(employeeFrame, text='Address')
+    empAddressLabel.grid(column=1, row=4, sticky=W)
+    empStreetLabel = ttk.Label(employeeFrame, text='Street Address', style='small.TLabel')
+    empStreetLabel.grid(column=1, row=5, sticky=W)
+    empStreetEntry = ttk.Entry(employeeFrame, textvariable='employeeStreet')
+    empStreetEntry.grid(column=1, row=6, columnspan=3, sticky=W)
+    empCityLabel = ttk.Label(employeeFrame, text='City', style='small.TLabel')
+    empCityLabel.grid(column=4, row=5, sticky=W)
+    empCityEntry = ttk.Entry(employeeFrame, textvariable='employeeCity')
+    empCityEntry.grid(column=4, row=6, columnspan=2, sticky=W)
+    empStateLabel = ttk.Label(employeeFrame, text='State', style='small.TLabel')
+    empStateLabel.grid(column=6, row=5, sticky=W)
+    empStateEntry = ttk.Entry(employeeFrame, textvariable='employeeCity')
+    empStateEntry.grid(column=6, row=6, sticky=W)
+    empZipLabel = ttk.Label(employeeFrame, text='Zip Code', style='small.TLabel')
+    empZipLabel.grid(column=7, row=5, sticky=W)
+    empZipEntry = ttk.Entry(employeeFrame, textvariable='employeeZip')
+    empZipEntry.grid(column=7, row=6, sticky=W)
 
-    empPhoneLabel = ttk.Label(employeeFrame, text='Phone #').grid(column=1, row=7, sticky=W)
-    empPhoneEntry = ttk.Entry(employeeFrame, textvariable='employeePhone').grid(column=1, row=8, sticky=W)
+    empPhoneLabel = ttk.Label(employeeFrame, text='Phone #')
+    empPhoneLabel.grid(column=1, row=7, sticky=W)
+    empPhoneEntry = ttk.Entry(employeeFrame, textvariable='employeePhone')
+    empPhoneEntry.grid(column=1, row=8, sticky=W)
 
-    empSaveButton = Button(employeeFrame, text='Save', bg='blue', fg='white', font=('Helvetica', 10)).grid(column=7, row=9, sticky=E)
+    empExitButton = ttk.Button(employeeFrame, text='Exit', command=EmployeeDirectory)
+    empExitButton.grid(column=6, row=9, sticky=E)
+    empSaveButton = Button(employeeFrame, text='Save', bg='blue', fg='white', font=('Helvetica', 10))
+    empSaveButton.grid(column=7, row=9, sticky=E)
+
+    sep2 = ttk.Separator(employeeFrame, orient=HORIZONTAL)
+    sep2.grid(column=1, columnspan=7, row=10, sticky=(W,E))
+    employerInfoLabel = ttk.Label(employeeFrame, text='Employer Info')
+    employerInfoLabel.grid(column=1, row=11, sticky=W)
+    empIDLabel = ttk.Label(employeeFrame, text='Employee ID', style='small.TLabel')
+    empIDLabel.grid(column=1, row=12, sticky=W)
+    empIDEntry = ttk.Entry(employeeFrame, textvariable='employeeID')
+    empIDEntry.grid(column=1, row=13, sticky=W)
+
+    PadSpace()
 
 #Setup navigation bar that sits on the left of the screen
-def NavigationBar():
+def NavigationBar(locator):
     #Adjust root to balance screen around navbar + the other page
     root.columnconfigure(5, weight=1, minsize=50)
     #NavBar frame for all pages
     navigationFrame = ttk.Frame(root, padding="3 3 12 12")
-    navigationFrame.grid(column=1, row=0, rowspan = 5)
+    navigationFrame.grid(column=1, row=1, rowspan = 3, sticky=(N, S))
     navigationFrame['borderwidth'] = 4
     navigationFrame['relief'] = GROOVE
 
-    for i in range(5):
+    for i in range(7):
         navigationFrame.rowconfigure(i, minsize=50)
 
     #NavBar widgets
-    directory = ttk.Button(navigationFrame, text='Directory', command=EmployeeDirectory).grid(column=0, row=0)
-    backToEmployee = ttk.Button(navigationFrame, text='Employee', command=EmployeeInfo).grid(column=0, row=1)
-    logout = ttk.Button(navigationFrame, text='Logout', command=Logout).grid(column=0, row=4)
+    if locator == 0:
+        directory = ttk.Button(navigationFrame, text='Directory', command=EmployeeDirectory)
+        directory.grid(column=0, row=0)
+    else:
+        backToEmployee = ttk.Button(navigationFrame, text='Employee', command=EmployeeInfo)
+        backToEmployee.grid(column=0, row=0)
+    logout = ttk.Button(navigationFrame, text='Logout', command=Logout)
+    logout.grid(column=0, row=9, sticky=S)
 
 #Display employee directory
 def EmployeeDirectory():
-    return
+    CleanScreen()
+    
+    NavigationBar(1)
+    
+    #Main directory frame
+    directFrame = ttk.Frame(root, padding="3 3 12 12")
+    directFrame.grid(column=2, row=1, columnspan=3, rowspan=3)
+    directFrame['borderwidth'] = 4
+    directFrame['relief'] = GROOVE
+    for i in range(9):
+        directFrame.columnconfigure(i, minsize=30)
+    for i in range(13):
+        directFrame.rowconfigure(i, minsize=30)
+
+    searchLabel = ttk.Label(directFrame, text='Search')
+    searchLabel.grid(column=1, row=0, sticky=W)
+
+    searchEntry = ttk.Entry(directFrame, textvariable='Search')
+    searchEntry.grid(column=1, row=1, columnspan=3, sticky=(W, E))
+
+    searchVar = StringVar(directFrame, 'Employee ID')
+    searchCombo = ttk.Combobox(directFrame,  state='readonly', textvariable=searchVar)
+    searchCombo.grid(column=4, row=1)
+    searchCombo['values']=('Employee ID', 'First Name', 'Last Name', 'Position')
+
+    searchImage = PhotoImage(file='search.png')
+    searchButton = ttk.Button(directFrame, image=searchImage, command=Search)
+    searchButton.grid(column=5, row=1)
+
+    PadSpace()
 
 #Login process deletes login page then calls employee info to construct that page.
 def Login(empid = 0, password = 'a'):
-    for child in root.winfo_children():
-        child.destroy()
 
-    NavigationBar()
     EmployeeInfo()
 
 #Logout removes the current user variable, and returns to the login screen
 def Logout():
+
+    DisplayLogin()
+
+#Clean screen function to remove unneeded widgets
+def CleanScreen():
     for child in root.winfo_children():
         child.destroy()
 
-    DisplayLogin()
+#PadSpace to quickly add a minimum amount of space between many widgets  
+def PadSpace():
+    #add minimum padding to all of the widgets
+    for child in root.winfo_children():
+        for innerChild in child.winfo_children():
+            innerChild.grid_configure(padx=5, pady=5)
+
+#Search employee directory based on currently selected criteria
+def Search():
+    return 0
 
 #Display login is called on program start
 DisplayLogin()
