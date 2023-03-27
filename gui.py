@@ -1,5 +1,8 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, filedialog
+from tkinter.filedialog import askopenfile
+import math
+import os
 
 #Setup root
 root = Tk()
@@ -65,8 +68,8 @@ def DisplayLogin():
 
     PadSpace()
 
-#Second page is employee info
-def EmployeeInfo():
+#Second page is employee info !!!Currently doesn't actually use the argument needs database connection
+def EmployeeInfo(employee):
     CleanScreen()
 
     NavigationBar(0)
@@ -150,7 +153,7 @@ def NavigationBar(locator):
         directory = ttk.Button(navigationFrame, text='Directory', command=EmployeeDirectory)
         directory.grid(column=0, row=0)
     else:
-        backToEmployee = ttk.Button(navigationFrame, text='Employee', command=EmployeeInfo)
+        backToEmployee = ttk.Button(navigationFrame, text='Employee', command=lambda: EmployeeInfo(''))
         backToEmployee.grid(column=0, row=0)
     logout = ttk.Button(navigationFrame, text='Logout', command=Logout)
     logout.grid(column=0, row=9, sticky=S)
@@ -168,8 +171,6 @@ def EmployeeDirectory():
     directFrame['relief'] = GROOVE
     for i in range(9):
         directFrame.columnconfigure(i, minsize=30)
-    for i in range(13):
-        directFrame.rowconfigure(i, minsize=30)
 
     searchLabel = ttk.Label(directFrame, text='Search')
     searchLabel.grid(column=1, row=0, sticky=W)
@@ -184,14 +185,68 @@ def EmployeeDirectory():
 
     searchImage = PhotoImage(file='search.png')
     searchButton = ttk.Button(directFrame, image=searchImage, command=Search)
+    referenceLabel= ttk.Label(image=searchImage)
+    referenceLabel.image = searchImage
     searchButton.grid(column=5, row=1)
+
+    subFrame = ttk.Frame(directFrame, padding="3 3 12 12")
+    subFrame.grid(column=0, columnspan=9, row=2, sticky=(N, S, E, W))
+    subFrame['borderwidth'] = 4
+    subFrame['relief'] = GROOVE
+    for i in range(17):
+        subFrame.columnconfigure(i, minsize=30)
+
+    archLabel = ttk.Label(subFrame, text='Archived')
+    archLabel.grid(column=0, row=0)
+    firstNameLabel = ttk.Label(subFrame, text='First Name')
+    firstNameLabel.grid(column=2, columnspan=2, row=0)
+    lastNameLabel = ttk.Label(subFrame, text='Last Name')
+    lastNameLabel.grid(column=5, columnspan=2, row=0)
+    idLabel = ttk.Label(subFrame, text='Employee ID')
+    idLabel.grid(column=8, row=0)
+    titleLabel = ttk.Label(subFrame, text='Job Title')
+    titleLabel.grid(column=10, row=0)
+    phoneLabel = ttk.Label(subFrame, text='Phone Number')
+    phoneLabel.grid(column=12, columnspan=3, row=0)
+
+    rowCount = 1
+    #loop should iterate through array of employees current loop structure for testing layout only
+    horizonSep = []
+    for employee in range(5):
+        horizonSep.append(ttk.Separator(subFrame, orient=HORIZONTAL).grid(column=0, columnspan=17, row=rowCount, sticky=(W, E)))
+        rowCount += 1
+
+        viewButton = ttk.Button(subFrame, text='View', command=lambda: EmployeeInfo(''))
+        viewButton.grid(column=16, row=rowCount)
+        rowCount += 1
+
+
+    #Separators down column 1, 4, 7, 9, 11, 15
+    vertSep1 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep1.grid(column=1, row=0, sticky=(N, S))
+    
+    vertSep4 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep4.grid(column=4, row=0, sticky=(N, S))
+    
+    vertSep7 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep7.grid(column=7, row=0, sticky=(N, S))
+    
+    vertSep9 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep9.grid(column=9, row=0, sticky=(N, S))
+
+    vertSep11 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep11.grid(column=11, row=0, sticky=(N, S))
+
+    vertSep15 = ttk.Separator(subFrame, orient=VERTICAL)
+    vertSep15.grid(column=15, row=0, sticky=(N, S))
+
 
     PadSpace()
 
 #Login process deletes login page then calls employee info to construct that page.
 def Login(empid = 0, password = 'a'):
 
-    EmployeeInfo()
+    EmployeeInfo('')
 
 #Logout removes the current user variable, and returns to the login screen
 def Logout():
