@@ -38,6 +38,7 @@ employeeDOB = StringVar()
 employeeStart = StringVar()
 employeeTitle = StringVar()
 employeeDepartment = StringVar()
+employeeArchived = StringVar(value='False')
 
 """
     Basic trace function, currently does nothing except exist as part of the
@@ -178,7 +179,7 @@ def EmployeeInfo(employee: database.Employee):
     empDobLabel = ttk.Label(employeeFrame, text="Date of Birth")
     empDobLabel.grid(column=1, row=9)
     employeeDOB.set(employee.DOB)
-    empDobEntry = ttk.Entry(employeeFrame, textvariable=employeeDOB, state='readonly')
+    empDobEntry = ttk.Entry(employeeFrame, textvariable=employeeDOB)
     empDobEntry.grid(column=1, row=10)
 
     empExitButton = ttk.Button(employeeFrame, text='Exit', command=lambda: EmployeeDirectory(employee))
@@ -218,7 +219,10 @@ def EmployeeInfo(employee: database.Employee):
     empDepartmentEntry.grid(column=5, row=17, sticky=W)
 
     empArchivedLabel = ttk.Label(employeeFrame, text='Archived')
-    empArchivedLabel.grid(column=1, row=18)
+    empArchivedLabel.grid(column=1, row=18, sticky=W)
+    empArchivedCombo = ttk.Combobox(employeeFrame, state='readonly', textvariable=employeeArchived, width=6)
+    empArchivedCombo['values'] = ('False', 'True')
+    empArchivedCombo.grid(column=1, row=19, sticky=W)
 
     """ 
         Disable editing for all fields that can be edited by another user but not self
@@ -228,6 +232,7 @@ def EmployeeInfo(employee: database.Employee):
         empEmailEntry['state'] = 'readonly'
         empTitleEntry['state'] = 'readonly'
         empDepartmentEntry['state'] = 'readonly'
+        empArchivedCombo['state'] = 'disabled'
 
     PadSpace()
 
