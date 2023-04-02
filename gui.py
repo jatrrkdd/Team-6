@@ -192,7 +192,7 @@ def employee_info(employee: database.Employee, current_user: database.Employee):
     dob_entry.grid(column=1, row=10)
 
     exit_button = ttk.Button(employee_frame, text='Exit',
-                             command=lambda: employee_directory(current_user, db))
+                             command=lambda: employee_directory(current_user, db, None, None))
     exit_button.grid(column=6, row=11, sticky=E)
     save_button = Button(employee_frame, text='Save', bg='blue', fg='white',
                          font=('Helvetica', 10), command=update_employee())
@@ -220,7 +220,7 @@ def employee_info(employee: database.Employee, current_user: database.Employee):
     title_label = ttk.Label(employee_frame, text='Title')
     title_label.grid(column=1, row=16, sticky='w')
     employeeTitle.set(employee.title)
-    title_entry = ttk.Entry(employee_frame, textvariable=employeeTitle)
+    title_entry = ttk.Entry(employee_frame, textvariable=employeeTitle, state='readonly')
     title_entry.grid(column=1, row=17, sticky='w')
 
     department_label = ttk.Label(employee_frame, text='Department')
@@ -247,7 +247,7 @@ def employee_info(employee: database.Employee, current_user: database.Employee):
     payroll_class_entry = ttk.Entry(employee_frame, textvariable=employee_classification)
     employee_classification.trace_add('write', basic_callback)
     payroll_class_entry.grid(column=1,row=23)
-    match employee_classification:
+    match employee_classification.get():
         case 1:
             employee_pay_label = ttk.Label(employee_frame, text='Hourly Wage')
             employee_classification.set("Hourly")
@@ -320,7 +320,7 @@ def navigation_bar(locator, navigator: database.Employee):
     #NavBar widgets
     if locator == 0:
         directory = ttk.Button(navigation_frame, text='Directory',
-                               command=lambda: employee_directory(navigator, db))
+                               command=lambda: employee_directory(navigator, db, None, None))
         directory.grid(column=0, row=0)
     else:
         back_to_employee = ttk.Button(navigation_frame, text='Employee',
@@ -350,7 +350,7 @@ def navigation_bar(locator, navigator: database.Employee):
     logout_button.grid(column=0, row=9, sticky=S)
 
 #Display employee directory
-def employee_directory(employee, data):
+def employee_directory(employee, data: database.Database, search_type, value):
     """Display a list of the employees, display results of search to limit who is displayed"""
     clean_screen()
 
@@ -380,7 +380,7 @@ def employee_directory(employee, data):
     search_combo = ttk.Combobox(direct_frame,  state='readonly', textvariable=search_var)
     search_var.trace_add('write', basic_callback)
     search_combo.grid(column=4, row=1)
-    search_combo['values']=('Employee ID', 'First Name', 'Last Name', 'Position')
+    search_combo['values']=('Employee ID', 'Name', 'Position')
 
     search_image = PhotoImage(file='search.png')
     print(search_var.get)
@@ -419,7 +419,18 @@ def employee_directory(employee, data):
     horizon_sep = []
     check_box = []
     view_buttons = []
-    for emp in data.employees:
+
+    if search_type:
+        if search_type == 'Employee ID':
+            employees = data.find_employees(None, value)
+        elif search_type == 'Name':
+            employees = data.find_employees(value)
+        elif search_type == 'Position':
+            employees = data.find_employees(None, None, value)
+    else:
+        employees = data.employees
+
+    for emp in employees:
         horizon_sep.append(ttk.Separator(sub_frame, orient=HORIZONTAL)
                            .grid(column=0, columnspan=17, row=row_count, sticky=(W, E)))
         row_count += 1
@@ -601,20 +612,9 @@ def update_employee():
 def search(value, mode, data: database.Database):
     """Call and display the employee search results from database.py"""
     val = str(value.get())
+    mod = str(mode.get())
 
-    match mode.get():
-        case 'Employee ID':
-            employee_directory(user, data.find_employees(None, val))
-        case 'First Name':
-            employee_directory(user, data.find_employees(val))
-        case 'Last Name':
-            employee_directory(user, data.find_employees(val))
-        case 'Position':
-            employee_directory(user, data.find_employees(None, None, val))
-        case _:
-            print(mode.get())
-            print('Search mode error')
-    return 0
+    employee_directory(user, data, mod, val)
 
 #Display login is called on program start
 display_login()
