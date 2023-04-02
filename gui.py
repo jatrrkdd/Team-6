@@ -189,7 +189,7 @@ def employee_info(employee: database.Employee):
     dob_entry.grid(column=1, row=10)
 
     exit_button = ttk.Button(employee_frame, text='Exit',
-                             command=lambda: employee_directory(employee))
+                             command=lambda: employee_directory(employee, db))
     exit_button.grid(column=6, row=11, sticky=E)
     save_button = Button(employee_frame, text='Save', bg='blue', fg='white',
                          font=('Helvetica', 10), command=update_employee())
@@ -243,7 +243,6 @@ def employee_info(employee: database.Employee):
     employee_classification.set(employee.classification)
     payroll_class_entry = ttk.Entry(employee_frame, textvariable=employee_classification)
     employee_classification.trace_add('write', basic_callback)
-    print(employee_classification)
     payroll_class_entry.grid(column=1,row=23)
     match employee_classification:
         case 1:
@@ -270,23 +269,23 @@ def employee_info(employee: database.Employee):
         case _:
             print("Payroll information error")
 
-    employee_pay_method.set(employee.pay_method)
-    if employee_pay_method == 1:
-        payment_title = ttk.Label(employee_frame, text='Bank Information')
-        payment_title.grid(column=1, row=24)
-        payment_routing_label = ttk.Label(employee_frame, text='Routing #')
-        payment_routing_label.grid(column=1, row=25)
-        employee_routing.set(employee.route)
-        payment_routing_entry = ttk.Entry(employee_frame, textvariable=employee_routing)
-        payment_routing_entry.grid(column=1, row=26)
-        payment_account_label = ttk.Label(employee_frame, text='Account #')
-        payment_account_label.grid(column=5, row=25)
-        employee_account_num.set(employee.account)
-        payment_account_entry = ttk.Entry(employee_frame, textvariable=employee_account_num)
-        payment_account_entry.grid(column=5, row=26)
-    else:
-        payment_title = ttk.Label(employee_frame, text='Check by Mail')
-        payment_title.grid(column=1, row=24)
+    #employee_pay_method.set(employee.pay_method)
+    #if employee_pay_method == 1:
+    payment_title = ttk.Label(employee_frame, text='Bank Information')
+    payment_title.grid(column=1, row=24)
+    payment_routing_label = ttk.Label(employee_frame, text='Routing #')
+    payment_routing_label.grid(column=1, row=25)
+    employee_routing.set(employee.route)
+    payment_routing_entry = ttk.Entry(employee_frame, textvariable=employee_routing)
+    payment_routing_entry.grid(column=1, row=26)
+    payment_account_label = ttk.Label(employee_frame, text='Account #')
+    payment_account_label.grid(column=5, row=25)
+    employee_account_num.set(employee.account)
+    payment_account_entry = ttk.Entry(employee_frame, textvariable=employee_account_num)
+    payment_account_entry.grid(column=5, row=26)
+    #else:
+    #    payment_title = ttk.Label(employee_frame, text='Check by Mail')
+    #    payment_title.grid(column=1, row=24)
 
     #Disable editing for all fields that can be edited by another user but not self
     if user.id == employee.id:
@@ -317,7 +316,7 @@ def navigation_bar(locator, navigator: database.Employee):
     #NavBar widgets
     if locator == 0:
         directory = ttk.Button(navigation_frame, text='Directory',
-                               command=lambda: employee_directory(navigator))
+                               command=lambda: employee_directory(navigator, db))
         directory.grid(column=0, row=0)
     else:
         back_to_employee = ttk.Button(navigation_frame, text='Employee',
@@ -327,17 +326,19 @@ def navigation_bar(locator, navigator: database.Employee):
     row_count=1
 
     #Display priveleged widgets !!!Will fix levels in later testing.
-    if int(user.permission_level) >= 1:
-        admin = ttk.Button(navigation_frame, text='Admin', command=lambda: admin_directory(user))
+    if int(navigator.permission_level) >= 1:
+        admin = ttk.Button(navigation_frame, text='Admin',
+                           command=lambda: admin_directory(navigator))
         admin.grid(column=0, row=row_count)
         row_count+=1
-    if int(user.permission_level) >= 1:
-        payroll = ttk.Button(navigation_frame, text='Payroll', command=lambda: payroll_page(user))
+    if int(navigator.permission_level) >= 1:
+        payroll = ttk.Button(navigation_frame, text='Payroll',
+                             command=lambda: payroll_page(navigator))
         payroll.grid(column=0, row=row_count)
         row_count+=1
-    if int(user.permission_level) >= 1:
+    if int(navigator.permission_level) >= 1:
         emp_report = ttk.Button(navigation_frame, text='Employee\nReport',
-                                command=lambda: employee_report(user))
+                                command=lambda: employee_report(navigator))
         emp_report.grid(column=0, row=row_count)
 
 
@@ -345,7 +346,7 @@ def navigation_bar(locator, navigator: database.Employee):
     logout_button.grid(column=0, row=9, sticky=S)
 
 #Display employee directory
-def employee_directory(employee):
+def employee_directory(employee, data):
     """Display a list of the employees, display results of search to limit who is displayed"""
     clean_screen()
 
@@ -356,8 +357,12 @@ def employee_directory(employee):
     direct_frame.grid(column=2, row=1, columnspan=3, rowspan=3)
     direct_frame['borderwidth'] = 4
     direct_frame['relief'] = GROOVE
-    for i in range(9):
+    direct_frame.grid_rowconfigure(0, weight=1)
+    direct_frame.grid_columnconfigure(0, weight=1)
+    for i in range(10):
         direct_frame.columnconfigure(i, minsize=30)
+
+    #Widgets that occupy the page
 
     search_label = ttk.Label(direct_frame, text='Search')
     search_label.grid(column=1, row=0, sticky='w')
@@ -376,12 +381,16 @@ def employee_directory(employee):
     reference_label.image = search_image
     search_button.grid(column=5, row=1)
 
-    sub_frame = ttk.Frame(direct_frame, padding="3 3 12 12")
+    slide_canvas = Canvas(direct_frame)
+    slide_canvas.grid(column=1, row=6, sticky='news')
+
+    sub_frame = ttk.Frame(slide_canvas)
     sub_frame.grid(column=0, columnspan=9, row=2, sticky=(N, S, E, W))
     sub_frame['borderwidth'] = 4
     sub_frame['relief'] = GROOVE
     for i in range(17):
         sub_frame.columnconfigure(i, minsize=30)
+
 
     arch_label = ttk.Label(sub_frame, text='Archived')
     arch_label.grid(column=0, row=0)
@@ -399,14 +408,39 @@ def employee_directory(employee):
     row_count = 1
     #loop should iterate through array of employees current loop structure for testing layout only
     horizon_sep = []
-    for employee in range(5):
+    for emp in data.employees:
         horizon_sep.append(ttk.Separator(sub_frame, orient=HORIZONTAL)
                            .grid(column=0, columnspan=17, row=row_count, sticky=(W, E)))
         row_count += 1
 
-        view_button = ttk.Button(sub_frame, text='View', command=lambda: employee_info(''))
+        employee_archive = emp.archived
+        archived_check = ttk.Checkbutton(sub_frame, onvalue='True', offvalue='False',
+                                         variable=employee_archive)
+        archived_check.grid(column=0, row=row_count)
+
+        first_name_label = ttk.Label(sub_frame, text=emp.first_name)
+        first_name_label.grid(column=2, row=row_count, sticky=W)
+
+        last_name_label = ttk.Label(sub_frame, text=emp.last_name)
+        last_name_label.grid(column=5, row=row_count, sticky=W)
+
+        id_label = ttk.Label(sub_frame, text=emp.id)
+        id_label.grid(column=8, row=row_count, sticky=W)
+
+        title_label = ttk.Label(sub_frame, text=emp.title)
+        title_label.grid(column=10, row=row_count, sticky=W)
+
+        phone_label = ttk.Label(sub_frame, text=emp.office_phone)
+        phone_label.grid(column=12, row=row_count)
+
+        view_button = ttk.Button(sub_frame, text='View',
+                                 command=lambda: employee_info(db.find_employees(None, emp.id)))
         view_button.grid(column=16, row=row_count)
         row_count += 1
+
+    long_view = ttk.Scrollbar(slide_canvas, command=slide_canvas.yview)
+    long_view.grid(column=9, row=0, rowspan=row_count, sticky='ns')
+    slide_canvas.configure(yscrollcommand=long_view.set)
 
 
     #Separators down column 1, 4, 7, 9, 11, 15
