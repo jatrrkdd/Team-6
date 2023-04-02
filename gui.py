@@ -1,29 +1,26 @@
+"""GUI module for employee directory and payroll management system"""
 from tkinter import *
-from tkinter import ttk, filedialog
-from tkinter.filedialog import askopenfile
-import math
-import os
+from tkinter import ttk
 import database
 
-"""
-    The following instanciation of the database is for testing to make sure I understand
-    how to properly call all of the attributes and functions necessary to adapt my code
-    to prepare for integration.
-"""
+
+#    The following instanciation of the database is for testing to make sure I understand
+#    how to properly call all of the attributes and functions necessary to adapt my code
+#    to prepare for integration.
 db = database.Database(None,"")
 
 #Setup root
 root = Tk()
-root.title("UVU Employee Services") 
+root.title("UVU Employee Services")
 
 #Setup alternate style
 style = ttk.Style()
 style.configure('small.TLabel', font=('Helvetica', 7))
 
-"""
-    Initialization of various variables that keep getting garbage collected early
-"""
-CURR_EMPLOYEE = None
+
+#Initialization of various variables that keep getting garbage collected early
+
+user = None
 empolyee_id = StringVar()
 password = StringVar()
 employeeFirstName = StringVar()
@@ -41,26 +38,27 @@ employeeDepartment = StringVar()
 employeeArchived = StringVar(value='False')
 employee_classification = StringVar()
 employee_pay_amount = StringVar()
+employee_pay_method = StringVar()
 employee_routing = StringVar()
 employee_account_num = StringVar()
 
-"""
-    Basic trace function, currently does nothing except exist as part of the
-    trace_add calls for the diffent textvariables that need to be managed.
-"""
-def BasicCallback(var, index, mode):
+
+def basic_callback(var, index, mode):
+    """Callback exists just to help tracefunctions work properly, no further functionality is currently needed"""
     return 0
 
 #Funtions to display each page.
 #First page is the login page
-def DisplayLogin():
-    CleanScreen()
+def display_login():
+    """Function clears the root, then displays the login page and implents the trace calls and
+    and commands needed for the page to function"""
+    clean_screen()
 
     #Setup the outer frame for the login page
-    loginFrame = ttk.Frame(root, padding="3 3 12 12")
-    loginFrame.grid(column=1, row=1, columnspan=3, rowspan=3)
-    loginFrame['borderwidth'] = 4
-    loginFrame['relief'] = GROOVE
+    login_frame = ttk.Frame(root, padding="3 3 12 12")
+    login_frame.grid(column=1, row=1, columnspan=3, rowspan=3)
+    login_frame['borderwidth'] = 4
+    login_frame['relief'] = 'groove'
 
     root.columnconfigure(0, weight=1, minsize=50)
     root.rowconfigure(0, weight=1, minsize=50)
@@ -74,218 +72,231 @@ def DisplayLogin():
     root.rowconfigure(4, weight=1, minsize=50)
     root.columnconfigure(5, weight=1, minsize=00)
 
-    loginFrame.columnconfigure(0, minsize=50)
-    loginFrame.rowconfigure(0, minsize=170)
-    loginFrame.columnconfigure(1, minsize=50)
-    loginFrame.rowconfigure(1, minsize=30)
-    loginFrame.columnconfigure(2, minsize=50)
-    loginFrame.rowconfigure(2, minsize=30)
-    loginFrame.columnconfigure(3, minsize=50)
-    loginFrame.rowconfigure(3, minsize=30)
-    loginFrame.columnconfigure(4, minsize=50)
-    loginFrame.rowconfigure(4, minsize=30)
-    loginFrame.columnconfigure(5, minsize=50)
-    loginFrame.rowconfigure(5, minsize=30)
-    loginFrame.columnconfigure(6, minsize=50)
-    loginFrame.rowconfigure(6, minsize=30)
+    login_frame.columnconfigure(0, minsize=50)
+    login_frame.rowconfigure(0, minsize=170)
+    login_frame.columnconfigure(1, minsize=50)
+    login_frame.rowconfigure(1, minsize=30)
+    login_frame.columnconfigure(2, minsize=50)
+    login_frame.rowconfigure(2, minsize=30)
+    login_frame.columnconfigure(3, minsize=50)
+    login_frame.rowconfigure(3, minsize=30)
+    login_frame.columnconfigure(4, minsize=50)
+    login_frame.rowconfigure(4, minsize=30)
+    login_frame.columnconfigure(5, minsize=50)
+    login_frame.rowconfigure(5, minsize=30)
+    login_frame.columnconfigure(6, minsize=50)
+    login_frame.rowconfigure(6, minsize=30)
 
     #Setup all of the necessary widgets
-    logo = ttk.Label(loginFrame, text='Cool Logo (need image)')
+    logo = ttk.Label(login_frame, text='Cool Logo (need image)')
     logo.grid(column=3,row=0)
-    title = ttk.Label(loginFrame, text='Sign In')
+    title = ttk.Label(login_frame, text='Sign In')
     title.grid(column=3, row=1)
-    idLabel = ttk.Label(loginFrame, text="Employee ID")
-    idLabel.grid(column=2, sticky=W)
-    idEntry = ttk.Entry(loginFrame, textvariable=empolyee_id)
-    empolyee_id.trace_add('write', BasicCallback)
-    idEntry.grid(column=2, columnspan=3, sticky=(W, E))
-    pssLabel = ttk.Label(loginFrame, text="Password")
-    pssLabel.grid(column=2, sticky=W)
-    pssEntry = ttk.Entry(loginFrame, textvariable=password, show="*")
-    password.trace_add('write', BasicCallback)
-    pssEntry.grid(column=2, columnspan=3, sticky=(W, E))
-    login = Button(loginFrame, text="Login", bg='blue', fg='white', font=('Helvetica', 10), command=lambda: Login(empolyee_id.get(), password.get()))
-    login.grid(column=4, sticky=E)
+    id_label = ttk.Label(login_frame, text="Employee ID")
+    id_label.grid(column=2, sticky='w')
+    id_entry = ttk.Entry(login_frame, textvariable=empolyee_id)
+    empolyee_id.trace_add('write', basic_callback)
+    id_entry.grid(column=2, columnspan=3, sticky='we')
+    pss_label = ttk.Label(login_frame, text="Password")
+    pss_label.grid(column=2, sticky='w')
+    pss_entry = ttk.Entry(login_frame, textvariable=password, show="*")
+    password.trace_add('write', basic_callback)
+    pss_entry.grid(column=2, columnspan=3, sticky='we')
+    login_button = Button(login_frame, text="Login", bg='blue', fg='white', font=('Helvetica', 10))
+    login_button['command'] =lambda: login(empolyee_id.get(), password.get())
+    login_button.grid(column=4, sticky='e')
 
-    PadSpace()
+    pad_space()
 
-#Second page is employee info !!!Currently doesn't actually use the argument needs database connection
-def EmployeeInfo(employee: database.Employee):
-    global CURR_EMPLOYEE
+#Second page is employee info
+def employee_info(employee: database.Employee):
+    """Clear screen, then display the employee info page.
+    After successful login the app defaults to this page displaying the user's information"""
 
-    CleanScreen()
+    clean_screen()
 
-    NavigationBar(0, employee)
+    navigation_bar(0, employee)
 
     #main frame for employee info page
-    employeeFrame = ttk.Frame(root, padding="3 3 12 12")
-    employeeFrame.grid(column=2, row=1, columnspan=3, rowspan=3)
-    employeeFrame['borderwidth'] = 4
-    employeeFrame['relief'] = GROOVE
+    employee_frame = ttk.Frame(root, padding="3 3 12 12")
+    employee_frame.grid(column=2, row=1, columnspan=3, rowspan=3)
+    employee_frame['borderwidth'] = 4
+    employee_frame['relief'] = GROOVE
     for i in range(9):
-        employeeFrame.columnconfigure(i, minsize=30)
+        employee_frame.columnconfigure(i, minsize=30)
     for i in range(13):
-        employeeFrame.rowconfigure(i, minsize=30)
+        employee_frame.rowconfigure(i, minsize=30)
 
     #setup the widgets
-    title = ttk.Label(employeeFrame, text='Employee Information')
+    title = ttk.Label(employee_frame, text='Employee Information')
     title.grid(column=5, row=0)
-    sep1 = ttk.Separator(employeeFrame, orient=HORIZONTAL)
+    sep1 = ttk.Separator(employee_frame, orient=HORIZONTAL)
     sep1.grid(column=1, columnspan=7, row=1, sticky=(W, E))
 
-    empFirstNameLabel = ttk.Label(employeeFrame, text='First Name')
-    empFirstNameLabel.grid(column=1, row=2, sticky=W)
+    first_name_label = ttk.Label(employee_frame, text='First Name')
+    first_name_label.grid(column=1, row=2, sticky='w')
     employeeFirstName.set(employee.first_name)
-    empFirstNameEntry = ttk.Entry(employeeFrame, textvariable=employeeFirstName)
-    employeeFirstName.trace_add('write', BasicCallback)
-    empFirstNameEntry.grid(column=1, row=3, columnspan=3, sticky=W)
-    empLastNameLabel = ttk.Label(employeeFrame, text='Last Name')
-    empLastNameLabel.grid(column=5, row=2, sticky=W)
+    first_name_entry = ttk.Entry(employee_frame, textvariable=employeeFirstName)
+    employeeFirstName.trace_add('write', basic_callback)
+    first_name_entry.grid(column=1, row=3, columnspan=3, sticky='w')
+    last_name_label = ttk.Label(employee_frame, text='Last Name')
+    last_name_label.grid(column=5, row=2, sticky='w')
     employeeLastName.set(employee.last_name)
-    empLastNameEntry = ttk.Entry(employeeFrame, textvariable=employeeLastName)
-    employeeLastName.trace_add('write', BasicCallback)
-    empLastNameEntry.grid(column=5, row=3, columnspan=3, sticky=W)
+    last_name_entry = ttk.Entry(employee_frame, textvariable=employeeLastName)
+    employeeLastName.trace_add('write', basic_callback)
+    last_name_entry.grid(column=5, row=3, columnspan=3, sticky='w')
 
-    empPhoneLabel = ttk.Label(employeeFrame, text='Phone #')
-    empPhoneLabel.grid(column=1, row=4, sticky=W)
+    phone_label = ttk.Label(employee_frame, text='Phone #')
+    phone_label.grid(column=1, row=4, sticky='w')
     employeePhone.set(employee.office_phone)
-    empPhoneEntry = ttk.Entry(employeeFrame, textvariable=employeePhone)
-    empPhoneEntry.grid(column=1, row=5, sticky=W)
-    empEmailLabel = ttk.Label(employeeFrame, text='Email')
-    empEmailLabel.grid(column=5, row=4, sticky=W)
+    phone_entry = ttk.Entry(employee_frame, textvariable=employeePhone)
+    phone_entry.grid(column=1, row=5, sticky='w')
+    email_label = ttk.Label(employee_frame, text='Email')
+    email_label.grid(column=5, row=4, sticky='w')
     employeeEmail.set(employee.email)
-    empEmailEntry = ttk.Entry(employeeFrame, textvariable=employeeEmail)
-    empEmailEntry.grid(column=5, row=5, sticky=W)
+    email_entry = ttk.Entry(employee_frame, textvariable=employeeEmail)
+    email_entry.grid(column=5, row=5, sticky='w')
 
-    empAddressLabel = ttk.Label(employeeFrame, text='Address')
-    empAddressLabel.grid(column=1, row=6, sticky=W)
-    empStreetLabel = ttk.Label(employeeFrame, text='Street Address', style='small.TLabel')
-    empStreetLabel.grid(column=1, row=7, sticky=W)
+    address_label = ttk.Label(employee_frame, text='Address')
+    address_label.grid(column=1, row=6, sticky='w')
+    street_label = ttk.Label(employee_frame, text='Street Address', style='small.TLabel')
+    street_label.grid(column=1, row=7, sticky='w')
     employeeStreet.set(employee.address)
-    empStreetEntry = ttk.Entry(employeeFrame, textvariable=employeeStreet)
-    empStreetEntry.grid(column=1, row=8, columnspan=3, sticky=W)
-    empCityLabel = ttk.Label(employeeFrame, text='City', style='small.TLabel')
-    empCityLabel.grid(column=4, row=7, sticky=W)
+    street_entry = ttk.Entry(employee_frame, textvariable=employeeStreet)
+    street_entry.grid(column=1, row=8, columnspan=3, sticky='w')
+    city_label = ttk.Label(employee_frame, text='City', style='small.TLabel')
+    city_label.grid(column=4, row=7, sticky='w')
     employeeCity.set(employee.city)
-    empCityEntry = ttk.Entry(employeeFrame, textvariable=employeeCity)
-    empCityEntry.grid(column=4, row=8, columnspan=2, sticky=W)
-    empStateLabel = ttk.Label(employeeFrame, text='State', style='small.TLabel')
-    empStateLabel.grid(column=6, row=7, sticky=W)
+    city_entry = ttk.Entry(employee_frame, textvariable=employeeCity)
+    city_entry.grid(column=4, row=8, columnspan=2, sticky='w')
+    state_label = ttk.Label(employee_frame, text='State', style='small.TLabel')
+    state_label.grid(column=6, row=7, sticky='w')
     employeeState.set(employee.state)
-    empStateEntry = ttk.Entry(employeeFrame, textvariable=employeeState)
-    empStateEntry.grid(column=6, row=8, sticky=W)
-    empZipLabel = ttk.Label(employeeFrame, text='Zip Code', style='small.TLabel')
-    empZipLabel.grid(column=7, row=7, sticky=W)
+    state_entry = ttk.Entry(employee_frame, textvariable=employeeState)
+    state_entry.grid(column=6, row=8, sticky='w')
+    zip_label = ttk.Label(employee_frame, text='Zip Code', style='small.TLabel')
+    zip_label.grid(column=7, row=7, sticky='w')
     employeeZip.set(employee.zip)
-    empZipEntry = ttk.Entry(employeeFrame, textvariable=employeeZip)
-    empZipEntry.grid(column=7, row=8, sticky=W)
+    zip_entry = ttk.Entry(employee_frame, textvariable=employeeZip)
+    zip_entry.grid(column=7, row=8, sticky='w')
 
-    empDobLabel = ttk.Label(employeeFrame, text="Date of Birth")
-    empDobLabel.grid(column=1, row=9)
+    dob_label = ttk.Label(employee_frame, text="Date of Birth")
+    dob_label.grid(column=1, row=9)
     employeeDOB.set(employee.DOB)
-    empDobEntry = ttk.Entry(employeeFrame, textvariable=employeeDOB)
-    empDobEntry.grid(column=1, row=10)
+    dob_entry = ttk.Entry(employee_frame, textvariable=employeeDOB)
+    dob_entry.grid(column=1, row=10)
 
-    empExitButton = ttk.Button(employeeFrame, text='Exit', command=lambda: EmployeeDirectory(employee))
-    empExitButton.grid(column=6, row=11, sticky=E)
-    empSaveButton = Button(employeeFrame, text='Save', bg='blue', fg='white', font=('Helvetica', 10))
-    empSaveButton.grid(column=7, row=11, sticky=E)
+    exit_button = ttk.Button(employee_frame, text='Exit', command=lambda: employee_directory(employee))
+    exit_button.grid(column=6, row=11, sticky=E)
+    save_button = Button(employee_frame, text='Save', bg='blue', fg='white', font=('Helvetica', 10))
+    save_button['command'] = update_employee()
+    save_button.grid(column=7, row=11, sticky=E)
 
-    sep2 = ttk.Separator(employeeFrame, orient=HORIZONTAL)
+    sep2 = ttk.Separator(employee_frame, orient=HORIZONTAL)
     sep2.grid(column=1, columnspan=7, row=12, sticky=(W,E))
-    employerInfoLabel = ttk.Label(employeeFrame, text='Employer Info')
-    employerInfoLabel.grid(column=1, row=12, sticky=W)
+    employerInfoLabel = ttk.Label(employee_frame, text='Employer Info')
+    employerInfoLabel.grid(column=1, row=12, sticky='w')
 
-    empIDLabel = ttk.Label(employeeFrame, text='Employee ID')
-    empIDLabel.grid(column=1, row=13, sticky=W)
+    empId_label = ttk.Label(employee_frame, text='Employee ID')
+    empId_label.grid(column=1, row=13, sticky='w')
     empolyee_id.set(employee.id)
-    empIDEntry = ttk.Entry(employeeFrame, textvariable=empolyee_id, state='readonly')
-    empIDEntry.grid(column=1, row=14, sticky=W)
+    empId_entry = ttk.Entry(employee_frame, textvariable=empolyee_id, state='readonly')
+    empId_entry.grid(column=1, row=14, sticky='w')
 
-    empStartLabel = ttk.Label(employeeFrame, text='Start Date')
+    empStartLabel = ttk.Label(employee_frame, text='Start Date')
     empStartLabel.grid(column=5, row=13)
     employeeStart.set(employee.start_date)
-    empStartEntry = ttk.Entry(employeeFrame, textvariable=employeeStart, state='readonly')
-    empStartEntry.grid(column=5, row=14, sticky=W)
+    empStartEntry = ttk.Entry(employee_frame, textvariable=employeeStart, state='readonly')
+    empStartEntry.grid(column=5, row=14, sticky='w')
 
-    empPositionLabel = ttk.Label(employeeFrame, text='Position')
-    empPositionLabel.grid(column=1, row=15, sticky=W)
-    empTitleLabel = ttk.Label(employeeFrame, text='Title')
-    empTitleLabel.grid(column=1, row=16, sticky=W)
+    empPositionLabel = ttk.Label(employee_frame, text='Position')
+    empPositionLabel.grid(column=1, row=15, sticky='w')
+    empTitleLabel = ttk.Label(employee_frame, text='Title')
+    empTitleLabel.grid(column=1, row=16, sticky='w')
     employeeTitle.set(employee.title)
-    empTitleEntry = ttk.Entry(employeeFrame, textvariable=employeeTitle)
-    empTitleEntry.grid(column=1, row=17, sticky=W)
+    empTitleEntry = ttk.Entry(employee_frame, textvariable=employeeTitle)
+    empTitleEntry.grid(column=1, row=17, sticky='w')
 
-    empDepartmentLabel = ttk.Label(employeeFrame, text='Department')
-    empDepartmentLabel.grid(column=5, row=16, sticky=W)
+    empDepartmentLabel = ttk.Label(employee_frame, text='Department')
+    empDepartmentLabel.grid(column=5, row=16, sticky='w')
     employeeDepartment.set(employee.dept)
-    empDepartmentEntry = ttk.Entry(employeeFrame, textvariable=employeeDepartment)
-    empDepartmentEntry.grid(column=5, row=17, sticky=W)
+    empDepartmentEntry = ttk.Entry(employee_frame, textvariable=employeeDepartment)
+    empDepartmentEntry.grid(column=5, row=17, sticky='w')
 
-    emp_archived_label = ttk.Label(employeeFrame, text='Archived')
-    emp_archived_label.grid(column=1, row=18, sticky=W)
-    emp_archived_combo = ttk.Combobox(employeeFrame, state='readonly', textvariable=employeeArchived, width=6)
+    emp_archived_label = ttk.Label(employee_frame, text='Archived')
+    emp_archived_label.grid(column=1, row=18, sticky='w')
+    emp_archived_combo = ttk.Combobox(employee_frame, state='readonly', textvariable=employeeArchived, width=6)
     emp_archived_combo['values'] = ('False', 'True')
-    emp_archived_combo.grid(column=1, row=19, sticky=W)
+    emp_archived_combo.grid(column=1, row=19, sticky='w')
     
-    sep3 = ttk.Separator(employeeFrame, orient=HORIZONTAL)
+    sep3 = ttk.Separator(employee_frame, orient=HORIZONTAL)
     sep3.grid(column=1, columnspan=7, row=20, sticky=(W,E))
 
-    payroll_title = ttk.Label(employeeFrame, text='Payroll Info')
+    payroll_title = ttk.Label(employee_frame, text='Payroll Info')
     payroll_title.grid(column=1, row=21)
-    payroll_class_label = ttk.Label(employeeFrame, text='Payroll Classification')
+    payroll_class_label = ttk.Label(employee_frame, text='Payroll Classification')
     payroll_class_label.grid(column=1, row=22)
     employee_classification.set(employee.classification)
-    payroll_class_entry = ttk.Entry(employeeFrame, textvariable=employee_classification)
+    payroll_class_entry = ttk.Entry(employee_frame, textvariable=employee_classification)
+    employee_classification.trace_add('write', basic_callback)
+    print(employee_classification)
     payroll_class_entry.grid(column=1,row=23)
     match employee_classification:
-        case 0:
-            employee_pay_label = ttk.Label(employeeFrame, text='Hourly Wage')
+        case 1:
+            employee_pay_label = ttk.Label(employee_frame, text='Hourly Wage')
+            employee_classification.set("Hourly")
             employee_pay_label.grid(column=5, row=22)
             employee_pay_amount.set(employee.hourly)
-            employee_pay_entry = ttk.Entry(employeeFrame, textvariable=employee_pay_amount)
+            employee_pay_entry = ttk.Entry(employee_frame, textvariable=employee_pay_amount)
             employee_pay_entry.grid(column=5, row=23)
-        case 1:
-            employee_pay_label = ttk.Label(employeeFrame, text='Commission')
+        case 3:
+            employee_pay_label = ttk.Label(employee_frame, text='Commission')
+            employee_classification.set('Commission')
             employee_pay_label.grid(column=5, row=22)
             employee_pay_amount.set(employee.commissioned)
-            employee_pay_entry = ttk.Entry(employeeFrame, textvariable=employee_pay_amount)
+            employee_pay_entry = ttk.Entry(employee_frame, textvariable=employee_pay_amount)
             employee_pay_entry.grid(column=5, row=23)
         case 2:
-            employee_pay_label = ttk.Label(employeeFrame, text='Yearly Salary')
+            employee_pay_label = ttk.Label(employee_frame, text='Yearly Salary')
+            employee_classification.set('Salary')
             employee_pay_label.grid(column=5, row=22)
             employee_pay_amount.set(employee.salary)
-            employee_pay_entry = ttk.Entry(employeeFrame, textvariable=employee_pay_amount)
+            employee_pay_entry = ttk.Entry(employee_frame, textvariable=employee_pay_amount)
             employee_pay_entry.grid(column=5, row=23)
         case _:
             print("Payroll information error")
 
-    payment_title = ttk.Label(employeeFrame, text='Bank Information')
-    payment_title.grid(column=1, row=24)
-    payment_routing_label = ttk.Label(employeeFrame, text='Routing #')
-    payment_routing_label.grid(column=1, row=25)
-    employee_routing.set(employee.route)
-    payment_routing_entry = ttk.Entry(employeeFrame, textvariable=employee_routing)
-    payment_routing_entry.grid(column=1, row=26)
-    payment_account_label = ttk.Label(employeeFrame, text='Account #')
-    payment_account_label.grid(column=5, row=25)
-    employee_account_num.set(employee.account)
-    payment_account_entry = ttk.Entry(employeeFrame, textvariable=employee_account_num)
-    payment_account_entry.grid(column=5, row=26)
+    employee_pay_method.set(employee.pay_method)
+    if employee_pay_method == 1:
+        payment_title = ttk.Label(employee_frame, text='Bank Information')
+        payment_title.grid(column=1, row=24)
+        payment_routing_label = ttk.Label(employee_frame, text='Routing #')
+        payment_routing_label.grid(column=1, row=25)
+        employee_routing.set(employee.route)
+        payment_routing_entry = ttk.Entry(employee_frame, textvariable=employee_routing)
+        payment_routing_entry.grid(column=1, row=26)
+        payment_account_label = ttk.Label(employee_frame, text='Account #')
+        payment_account_label.grid(column=5, row=25)
+        employee_account_num.set(employee.account)
+        payment_account_entry = ttk.Entry(employee_frame, textvariable=employee_account_num)
+        payment_account_entry.grid(column=5, row=26)
+    else:
+        payment_title = ttk.Label(employee_frame, text='Check by Mail')
+        payment_title.grid(column=1, row=24)
 
     #Disable editing for all fields that can be edited by another user but not self
-    if CURR_EMPLOYEE.id == employee.id:
-        empPhoneEntry['state'] = 'readonly'
-        empEmailEntry['state'] = 'readonly'
+    if user.id == employee.id:
+        phone_entry['state'] = 'readonly'
+        email_entry['state'] = 'readonly'
         empTitleEntry['state'] = 'readonly'
         empDepartmentEntry['state'] = 'readonly'
         emp_archived_combo['state'] = 'disabled'
         payroll_class_entry['state'] = 'readonly'
 
-    PadSpace()
+    pad_space()
 
 #Setup navigation bar that sits on the left of the screen
-def NavigationBar(locator, CURR_EMPLOYEE: database.Employee):
+def navigation_bar(locator, user: database.Employee):
     #Adjust root to balance screen around navbar + the other page
     root.columnconfigure(5, weight=1, minsize=50)
     #NavBar frame for all pages
@@ -299,10 +310,10 @@ def NavigationBar(locator, CURR_EMPLOYEE: database.Employee):
 
     #NavBar widgets
     if locator == 0:
-        directory = ttk.Button(navigationFrame, text='Directory', command=lambda: EmployeeDirectory(CURR_EMPLOYEE))
+        directory = ttk.Button(navigationFrame, text='Directory', command=lambda: employee_directory(user))
         directory.grid(column=0, row=0)
     else:
-        backToEmployee = ttk.Button(navigationFrame, text='Employee', command=lambda: EmployeeInfo(CURR_EMPLOYEE))
+        backToEmployee = ttk.Button(navigationFrame, text='Employee', command=lambda: employee_info(user))
         backToEmployee.grid(column=0, row=0)
 
     rowCount=1
@@ -313,27 +324,27 @@ def NavigationBar(locator, CURR_EMPLOYEE: database.Employee):
         test data are either 0 or 1 so for now I will proceed with only the one level of permission check
         though I will repeat the check for easier changes to it later.
     """
-    if int(CURR_EMPLOYEE.permission_level) >= 1:
-        admin = ttk.Button(navigationFrame, text='Admin', command=lambda: AdminDirectory(CURR_EMPLOYEE))
+    if int(user.permission_level) >= 1:
+        admin = ttk.Button(navigationFrame, text='Admin', command=lambda: admin_directory(user))
         admin.grid(column=0, row=rowCount)
         rowCount+=1
-    if int(CURR_EMPLOYEE.permission_level) >= 1:
-        payroll = ttk.Button(navigationFrame, text='Payroll', command=lambda: PayrollPage(CURR_EMPLOYEE))
+    if int(user.permission_level) >= 1:
+        payroll = ttk.Button(navigationFrame, text='Payroll', command=lambda: payroll_page(user))
         payroll.grid(column=0, row=rowCount)
         rowCount+=1
-    if int(CURR_EMPLOYEE.permission_level) >= 1:
-        empReport = ttk.Button(navigationFrame, text='Employee\nReport', command=lambda: EmployeeReport(CURR_EMPLOYEE))
+    if int(user.permission_level) >= 1:
+        empReport = ttk.Button(navigationFrame, text='Employee\nReport', command=lambda: employee_report(user))
         empReport.grid(column=0, row=rowCount)
 
 
-    logout = ttk.Button(navigationFrame, text='Logout', command=Logout)
-    logout.grid(column=0, row=9, sticky=S)
+    logout_button = ttk.Button(navigationFrame, text='Logout', command=logout)
+    logout_button.grid(column=0, row=9, sticky=S)
 
 #Display employee directory
-def EmployeeDirectory(CURR_EMPLOYEE):
-    CleanScreen()
+def employee_directory(user):
+    clean_screen()
     
-    NavigationBar(1, CURR_EMPLOYEE)
+    navigation_bar(1, user)
     
     #Main directory frame
     directFrame = ttk.Frame(root, padding="3 3 12 12")
@@ -344,7 +355,7 @@ def EmployeeDirectory(CURR_EMPLOYEE):
         directFrame.columnconfigure(i, minsize=30)
 
     searchLabel = ttk.Label(directFrame, text='Search')
-    searchLabel.grid(column=1, row=0, sticky=W)
+    searchLabel.grid(column=1, row=0, sticky='w')
 
     searchEntry = ttk.Entry(directFrame, textvariable='Search')
     searchEntry.grid(column=1, row=1, columnspan=3, sticky=(W, E))
@@ -373,8 +384,8 @@ def EmployeeDirectory(CURR_EMPLOYEE):
     firstNameLabel.grid(column=2, columnspan=2, row=0)
     lastNameLabel = ttk.Label(subFrame, text='Last Name')
     lastNameLabel.grid(column=5, columnspan=2, row=0)
-    idLabel = ttk.Label(subFrame, text='Employee ID')
-    idLabel.grid(column=8, row=0)
+    id_label = ttk.Label(subFrame, text='Employee ID')
+    id_label.grid(column=8, row=0)
     titleLabel = ttk.Label(subFrame, text='Job Title')
     titleLabel.grid(column=10, row=0)
     phoneLabel = ttk.Label(subFrame, text='Phone Number')
@@ -387,7 +398,7 @@ def EmployeeDirectory(CURR_EMPLOYEE):
         horizonSep.append(ttk.Separator(subFrame, orient=HORIZONTAL).grid(column=0, columnspan=17, row=rowCount, sticky=(W, E)))
         rowCount += 1
 
-        viewButton = ttk.Button(subFrame, text='View', command=lambda: EmployeeInfo(''))
+        viewButton = ttk.Button(subFrame, text='View', command=lambda: Employee_info(''))
         viewButton.grid(column=16, row=rowCount)
         rowCount += 1
 
@@ -412,69 +423,131 @@ def EmployeeDirectory(CURR_EMPLOYEE):
     vertSep15.grid(column=15, row=0, sticky=(N, S))
 
 
-    PadSpace()
+    pad_space()
 
 #Admin Page !!!Main bit of page can be copied from the directory function
-def AdminDirectory(CURR_EMPLOYEE):
-    CleanScreen()
+def admin_directory(admin_user):
+    """Display Admin Page, main unique feature is the add employee button which may require its own
+    page or pop-up screen since some employee attributes are not currently displayed or used at all"""
+    clean_screen()
 
-    NavigationBar(0, CURR_EMPLOYEE)
+    navigation_bar(0, admin_user)
 
-    PadSpace()
+    pad_space()
 
 #Payroll page !!!Main bit can be copied from directory
-def PayrollPage(CURR_EMPLOYEE):
-    CleanScreen()
+def payroll_page(payroll_user):
+    """Display the Payroll Report Page and call the export function"""
+    clean_screen()
 
-    NavigationBar(0, CURR_EMPLOYEE)
+    navigation_bar(0, payroll_user)
 
-    PadSpace()
+    pad_space()
 
 #Employee Report page !!!Main bit can be copied from directory
-def EmployeeReport(CURR_EMPLOYEE):
-    CleanScreen()
+def employee_report(curr_employe):
+    """Display the Employee Report Page and call the export function"""
+    clean_screen()
 
-    NavigationBar(0, CURR_EMPLOYEE)
+    navigation_bar(0, curr_employe)
 
-    PadSpace()
+    pad_space()
 
 #Login process deletes login page then calls employee info to construct that page.
-def Login(empID, password):
-    global CURR_EMPLOYEE
-    CURR_EMPLOYEE = db.check_login(empID, password)
-    
-    if CURR_EMPLOYEE:    
-        EmployeeInfo(CURR_EMPLOYEE)
+def login(user_id, user_password):
+    """Validate a correct combination of login information and set global user variable to the
+    associated employee from the database."""
+    global user
+    user = db.check_login(user_id, user_password)
+
+    if user:
+        employee_info(user)
 
 #Logout removes the current user variable, and returns to the login screen
-def Logout():
-    #Reset login variables
-    CURR_EMPLOYEE = None
+def logout():
+    """Reset login variables and display the login page."""
+    user = None
     empolyee_id.set('')
     password.set('')
 
     #Display Login page
-    DisplayLogin()
+    display_login()
 
 #Clean screen function to remove unneeded widgets
-def CleanScreen():
+def clean_screen():
+    """Remove all widgets in the root to prepare for a new page to load"""
     for child in root.winfo_children():
         child.destroy()
 
-#PadSpace to quickly add a minimum amount of space between many widgets  
-def PadSpace():
-    #add minimum padding to all of the widgets
+#Pad_space to quickly add a minimum amount of space between many widgets
+def pad_space():
+    """add minimum padding to all of the widgets"""
     for child in root.winfo_children():
         for innerChild in child.winfo_children():
             innerChild.grid_configure(padx=5, pady=5)
 
+def update_employee():
+    """Save changes made to an employee record"""
+    changed_employee = user
+
+    if employeeFirstName != changed_employee.first_name:
+        changed_employee.first_name = employeeFirstName
+    if employeeLastName != changed_employee.last_name:
+        changed_employee.last_name = employeeLastName
+    if employeePhone != changed_employee.phone:
+        changed_employee.phone = employeePhone
+    if employeeEmail != changed_employee.email:
+        changed_employee.email = employeeEmail
+    if employeeStreet != changed_employee.street:
+        changed_employee.street = employeeStreet
+    if employeeCity != changed_employee.city:
+        changed_employee.city = employeeCity
+    if employeeState != changed_employee.state:
+        changed_employee.state = employeeState
+    if employeeZip != changed_employee.zip:
+        changed_employee.zip = employeeZip
+    if employeeDOB != changed_employee.dob:
+        changed_employee.dob = employeeDOB
+    if employeeTitle != changed_employee.title:
+        changed_employee.title = employeeTitle
+    if employeeDepartment != changed_employee.dept:
+        changed_employee.dept = employeeDepartment
+    if employeeArchived != changed_employee.archived:
+        changed_employee.archived = employeeArchived
+    if employee_classification != changed_employee.classification:
+        changed_employee.classification = employee_classification
+
+    match employee_classification:
+        case 1:
+            if employee_pay_amount != changed_employee.hourly:
+                changed_employee.hourly = employee_pay_amount
+        case 2:
+            if employee_pay_amount != changed_employee.salary:
+                changed_employee.salary = employee_pay_amount
+        case 3:
+            if employee_pay_amount != changed_employee.commission:
+                changed_employee.commission = employee_pay_amount
+        case _:
+            print('employee payment update error')
+
+    if employee_pay_method != changed_employee.pay_method:
+        changed_employee.pay_method = employee_pay_method
+    if employee_pay_method == 1:
+        if employee_routing != changed_employee.route:
+            changed_employee.route = employee_routing
+        if employee_account_num != changed_employee.account:
+            changed_employee.account = employee_account_num
+
+    #need to figure out what function to call here
+    return 0
+
 #Search employee directory based on currently selected criteria
-def Search():
+def search():
+    """Call and display the employee search results from database.py"""
     return 0
 
 #Display login is called on program start
-DisplayLogin()
+display_login()
 
 #mainloop is required for the program to continue until user exits
 root.mainloop()
-
