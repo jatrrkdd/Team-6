@@ -332,7 +332,7 @@ def navigation_bar(locator, navigator: database.Employee):
     #Display priveleged widgets !!!Will fix levels in later testing.
     if int(navigator.permission_level) >= 1:
         admin = ttk.Button(navigation_frame, text='Admin',
-                           command=lambda: admin_directory(navigator))
+                           command=lambda: admin_directory(navigator, db))
         admin.grid(column=0, row=row_count)
         row_count+=1
     if int(navigator.permission_level) >= 1:
@@ -361,9 +361,11 @@ def employee_directory(employee, data: database.Database, search_type, value):
     direct_frame.grid(column=2, row=1, columnspan=3, rowspan=3)
     direct_frame['borderwidth'] = 4
     direct_frame['relief'] = GROOVE
-    direct_frame.grid_rowconfigure(0, weight=1)
-    direct_frame.grid_columnconfigure(0, weight=1)
     for i in range(10):
+        direct_frame.grid_rowconfigure(i, weight=1)
+        direct_frame.rowconfigure(i, minsize=30)
+    for i in range(6):
+        direct_frame.grid_columnconfigure(i, weight=1)
         direct_frame.columnconfigure(i, minsize=30)
 
     #Widgets that occupy the page
@@ -390,11 +392,8 @@ def employee_directory(employee, data: database.Database, search_type, value):
     reference_label.image = search_image
     search_button.grid(column=5, row=1)
 
-    slide_canvas = Canvas(direct_frame)
-    slide_canvas.grid(column=1,columnspan=10, row=6, sticky='news')
-
-    sub_frame = ttk.Frame(slide_canvas)
-    sub_frame.grid(column=0, columnspan=9, row=2, sticky=(N, S, E, W))
+    sub_frame = ttk.Frame(direct_frame)
+    sub_frame.grid(column=1, columnspan=9, row=2, sticky=(N, S, E, W))
     sub_frame['borderwidth'] = 4
     sub_frame['relief'] = GROOVE
     for i in range(17):
@@ -457,40 +456,161 @@ def employee_directory(employee, data: database.Database, search_type, value):
         view_buttons.append(view_employee(sub_frame, emp, db).grid(column=16, row=row_count))
         row_count += 1
 
-    long_view = ttk.Scrollbar(slide_canvas, command=slide_canvas.yview)
-    long_view.grid(column=9, row=0, rowspan=row_count, sticky='ns')
-    slide_canvas.configure(yscrollcommand=long_view.set)
-
-
     #Separators down column 1, 4, 7, 9, 11, 15
     vert_sep_1 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_1.grid(column=1, row=0, sticky=(N, S))
+    vert_sep_1.grid(column=1, row=0, rowspan=row_count, sticky=(N, S))
 
     vert_sep_4 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_4.grid(column=4, row=0, sticky=(N, S))
+    vert_sep_4.grid(column=4, row=0, rowspan=row_count, sticky=(N, S))
 
     vert_sep_7 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_7.grid(column=7, row=0, sticky=(N, S))
+    vert_sep_7.grid(column=7, row=0, rowspan=row_count, sticky=(N, S))
 
     vert_sep_9 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_9.grid(column=9, row=0, sticky=(N, S))
+    vert_sep_9.grid(column=9, row=0, rowspan=row_count, sticky=(N, S))
 
     vert_sep_11 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_11.grid(column=11, row=0, sticky=(N, S))
+    vert_sep_11.grid(column=11, row=0, rowspan=row_count, sticky=(N, S))
 
     vert_sep_15 = ttk.Separator(sub_frame, orient=VERTICAL)
-    vert_sep_15.grid(column=15, row=0, sticky=(N, S))
-
+    vert_sep_15.grid(column=15, row=0, rowspan=row_count, sticky=(N, S))
 
     pad_space()
 
 #Admin Page !!!Main bit of page can be copied from the directory function
-def admin_directory(admin_user):
+def admin_directory(admin_user, data:database.Database, search_type=None, value=None):
     """Display Admin Page, main unique feature is the add employee button which may require its own
     page or pop-up screen since some employee attributes are not currently displayed or used"""
     clean_screen()
 
-    navigation_bar(0, admin_user)
+    navigation_bar(1, admin_user)
+
+    #Main directory frame
+    admin_frame = ttk.Frame(root, padding="3 3 12 12")
+    admin_frame.grid(column=2, row=1, columnspan=3, rowspan=3)
+    admin_frame['borderwidth'] = 4
+    admin_frame['relief'] = GROOVE
+    for i in range(10):
+        admin_frame.grid_rowconfigure(i, weight=1)
+        admin_frame.rowconfigure(i, minsize=30)
+    for i in range(6):
+        admin_frame.grid_columnconfigure(i, weight=1)
+        admin_frame.columnconfigure(i, minsize=30)
+
+    #Widgets that occupy the page
+
+    search_label = ttk.Label(admin_frame, text='Search')
+    search_label.grid(column=1, row=0, sticky='w')
+
+    search_value.set('')
+    search_entry = ttk.Entry(admin_frame, textvariable=search_value)
+    search_value.trace_add('write', basic_callback)
+    search_entry.grid(column=1, row=1, columnspan=3, sticky=(W, E))
+
+    search_var.set('Employee ID')
+    search_combo = ttk.Combobox(admin_frame,  state='readonly', textvariable=search_var)
+    search_var.trace_add('write', basic_callback)
+    search_combo.grid(column=4, row=1)
+    search_combo['values']=('Employee ID', 'Name', 'Position')
+
+    search_image = PhotoImage(file='search.png')
+    print(search_var.get)
+    search_button = ttk.Button(admin_frame, image=search_image,
+                               command=lambda: admin_search(search_value, search_var, db))
+    reference_label= ttk.Label(image=search_image)
+    reference_label.image = search_image
+    search_button.grid(column=5, row=1)
+
+    sub_frame = ttk.Frame(admin_frame)
+    sub_frame.grid(column=1, columnspan=9, row=2, sticky=(N, S, E, W))
+    sub_frame['borderwidth'] = 4
+    sub_frame['relief'] = GROOVE
+    for i in range(17):
+        sub_frame.columnconfigure(i, minsize=30)
+
+
+    arch_label = ttk.Label(sub_frame, text='Archived')
+    arch_label.grid(column=0, row=0)
+    first_name_label = ttk.Label(sub_frame, text='First Name')
+    first_name_label.grid(column=2, columnspan=2, row=0)
+    last_name_label = ttk.Label(sub_frame, text='Last Name')
+    last_name_label.grid(column=5, columnspan=2, row=0)
+    id_label = ttk.Label(sub_frame, text='Employee ID')
+    id_label.grid(column=8, row=0)
+    title_label = ttk.Label(sub_frame, text='Job Title')
+    title_label.grid(column=10, row=0)
+    phone_label = ttk.Label(sub_frame, text='Phone Number')
+    phone_label.grid(column=12, columnspan=3, row=0)
+
+    row_count = 1
+    #loop should iterate through array of employees current loop structure for testing layout only
+    horizon_sep = []
+    check_box = []
+    view_buttons = []
+
+    if search_type:
+        if search_type == 'Employee ID':
+            employees = data.find_employees(None, value)
+        elif search_type == 'Name':
+            employees = data.find_employees(value)
+        elif search_type == 'Position':
+            employees = data.find_employees(None, None, value)
+    else:
+        employees = data.employees
+
+    for emp in employees:
+        horizon_sep.append(ttk.Separator(sub_frame, orient=HORIZONTAL)
+                           .grid(column=0, columnspan=17, row=row_count, sticky=(W, E)))
+        row_count += 1
+
+        employee_archive = emp.archived
+        check_box.append(ttk.Checkbutton(sub_frame, onvalue='True', offvalue='False',
+                                         variable=employee_archive).grid(column=0, row=row_count))
+
+        first_name_label = ttk.Label(sub_frame, text=emp.first_name)
+        first_name_label.grid(column=2, row=row_count, sticky=W)
+
+        last_name_label = ttk.Label(sub_frame, text=emp.last_name)
+        last_name_label.grid(column=5, row=row_count, sticky=W)
+
+        id_label = ttk.Label(sub_frame, text=emp.id)
+        id_label.grid(column=8, row=row_count, sticky=W)
+
+        title_label = ttk.Label(sub_frame, text=emp.title)
+        title_label.grid(column=10, row=row_count, sticky=W)
+
+        phone_label = ttk.Label(sub_frame, text=emp.office_phone)
+        phone_label.grid(column=12, row=row_count)
+
+        view_buttons.append(view_employee(sub_frame, emp, db).grid(column=16, row=row_count))
+        row_count += 1
+
+    #Separators down column 1, 4, 7, 9, 11, 15
+    vert_sep_1 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_1.grid(column=1, row=0, rowspan=row_count, sticky=(N, S))
+
+    vert_sep_4 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_4.grid(column=4, row=0, rowspan=row_count, sticky=(N, S))
+
+    vert_sep_7 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_7.grid(column=7, row=0, rowspan=row_count, sticky=(N, S))
+
+    vert_sep_9 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_9.grid(column=9, row=0, rowspan=row_count, sticky=(N, S))
+
+    vert_sep_11 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_11.grid(column=11, row=0, rowspan=row_count, sticky=(N, S))
+
+    vert_sep_15 = ttk.Separator(sub_frame, orient=VERTICAL)
+    vert_sep_15.grid(column=15, row=0, rowspan=row_count, sticky=(N, S))
+
+    employee_button = Button(admin_frame, text='Employee Report', bg='blue', fg='white',
+                             font=('Helvetica', 10), command=lambda: employee_report(admin_user))
+    employee_button.grid(column=0, row=7, sticky=W)
+
+    payroll_button = Button(admin_frame, text='Employee Report', bg='blue', fg='white',
+                             font=('Helvetica', 10), command=lambda: payroll_page(admin_user))
+    payroll_button.grid(column=2, row=7, sticky=W)
 
     pad_space()
 
@@ -615,6 +735,13 @@ def search(value, mode, data: database.Database):
     mod = str(mode.get())
 
     employee_directory(user, data, mod, val)
+
+def admin_search(value, mode, data: database.Database):
+    """Call and display the employee search results from database.py"""
+    val = str(value.get())
+    mod = str(mode.get())
+
+    admin_directory(user, data, mod, val)
 
 #Display login is called on program start
 display_login()
