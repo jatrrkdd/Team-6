@@ -19,7 +19,7 @@ style.configure('small.TLabel', font=('Helvetica', 7))
 
 
 #Initialization of various variables that keep getting garbage collected early
-
+#User is not a constant
 user = None
 empolyee_id = StringVar()
 password = StringVar()
@@ -44,7 +44,9 @@ employee_account_num = StringVar()
 
 
 def basic_callback(var, index, mode):
-    """Callback exists just to help tracefunctions work properly, no further functionality is currently needed"""
+    """Callback exists just to help tracefunctions work properly, no further 
+    functionality is currently needed"""
+
     return 0
 
 #Funtions to display each page.
@@ -188,8 +190,7 @@ def employee_info(employee: database.Employee):
 
     exit_button = ttk.Button(employee_frame, text='Exit', command=lambda: employee_directory(employee))
     exit_button.grid(column=6, row=11, sticky=E)
-    save_button = Button(employee_frame, text='Save', bg='blue', fg='white', font=('Helvetica', 10))
-    save_button['command'] = update_employee()
+    save_button = Button(employee_frame, text='Save', bg='blue', fg='white', font=('Helvetica', 10), command=update_employee())
     save_button.grid(column=7, row=11, sticky=E)
 
     sep2 = ttk.Separator(employee_frame, orient=HORIZONTAL)
@@ -366,7 +367,7 @@ def employee_directory(user):
     searchCombo['values']=('Employee ID', 'First Name', 'Last Name', 'Position')
 
     searchImage = PhotoImage(file='search.png')
-    searchButton = ttk.Button(directFrame, image=searchImage, command=Search)
+    searchButton = ttk.Button(directFrame, image=searchImage, command=search)
     referenceLabel= ttk.Label(image=searchImage)
     referenceLabel.image = searchImage
     searchButton.grid(column=5, row=1)
@@ -398,7 +399,7 @@ def employee_directory(user):
         horizonSep.append(ttk.Separator(subFrame, orient=HORIZONTAL).grid(column=0, columnspan=17, row=rowCount, sticky=(W, E)))
         rowCount += 1
 
-        viewButton = ttk.Button(subFrame, text='View', command=lambda: Employee_info(''))
+        viewButton = ttk.Button(subFrame, text='View', command=lambda: employee_info(''))
         viewButton.grid(column=16, row=rowCount)
         rowCount += 1
 
@@ -494,20 +495,20 @@ def update_employee():
         changed_employee.first_name = employeeFirstName
     if employeeLastName != changed_employee.last_name:
         changed_employee.last_name = employeeLastName
-    if employeePhone != changed_employee.phone:
-        changed_employee.phone = employeePhone
+    if employeePhone != changed_employee.office_phone:
+        changed_employee.office_phone = employeePhone
     if employeeEmail != changed_employee.email:
         changed_employee.email = employeeEmail
-    if employeeStreet != changed_employee.street:
-        changed_employee.street = employeeStreet
+    if employeeStreet != changed_employee.address:
+        changed_employee.address = employeeStreet
     if employeeCity != changed_employee.city:
         changed_employee.city = employeeCity
     if employeeState != changed_employee.state:
         changed_employee.state = employeeState
     if employeeZip != changed_employee.zip:
         changed_employee.zip = employeeZip
-    if employeeDOB != changed_employee.dob:
-        changed_employee.dob = employeeDOB
+    if employeeDOB != changed_employee.DOB:
+        changed_employee.DOB = employeeDOB
     if employeeTitle != changed_employee.title:
         changed_employee.title = employeeTitle
     if employeeDepartment != changed_employee.dept:
