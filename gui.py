@@ -41,12 +41,15 @@ employee_pay_amount = StringVar()
 employee_pay_method = StringVar()
 employee_routing = StringVar()
 employee_account_num = StringVar()
+search_var = StringVar()
+search_value = StringVar()
 
 
 def basic_callback(var, index, mode):
     """Callback exists just to help tracefunctions work properly, no further 
     functionality is currently needed"""
-
+    args = [var, index, mode]
+    args.append(0)
     return 0
 
 #Funtions to display each page.
@@ -111,13 +114,13 @@ def display_login():
     pad_space()
 
 #Second page is employee info
-def employee_info(employee: database.Employee):
+def employee_info(employee: database.Employee, current_user: database.Employee):
     """Clear screen, then display the employee info page.
     After successful login the app defaults to this page displaying the user's information"""
 
     clean_screen()
 
-    navigation_bar(0, employee)
+    navigation_bar(0, current_user)
 
     #main frame for employee info page
     employee_frame = ttk.Frame(root, padding="3 3 12 12")
@@ -189,7 +192,7 @@ def employee_info(employee: database.Employee):
     dob_entry.grid(column=1, row=10)
 
     exit_button = ttk.Button(employee_frame, text='Exit',
-                             command=lambda: employee_directory(employee, db))
+                             command=lambda: employee_directory(current_user, db))
     exit_button.grid(column=6, row=11, sticky=E)
     save_button = Button(employee_frame, text='Save', bg='blue', fg='white',
                          font=('Helvetica', 10), command=update_employee())
@@ -267,6 +270,7 @@ def employee_info(employee: database.Employee):
             employee_pay_entry = ttk.Entry(employee_frame, textvariable=employee_pay_amount)
             employee_pay_entry.grid(column=5, row=23)
         case _:
+            print(employee_classification.get)
             print("Payroll information error")
 
     #employee_pay_method.set(employee.pay_method)
@@ -320,7 +324,7 @@ def navigation_bar(locator, navigator: database.Employee):
         directory.grid(column=0, row=0)
     else:
         back_to_employee = ttk.Button(navigation_frame, text='Employee',
-                                      command=lambda: employee_info(navigator))
+                                      command=lambda: employee_info(navigator, navigator))
         back_to_employee.grid(column=0, row=0)
 
     row_count=1
@@ -367,22 +371,27 @@ def employee_directory(employee, data):
     search_label = ttk.Label(direct_frame, text='Search')
     search_label.grid(column=1, row=0, sticky='w')
 
-    search_entry = ttk.Entry(direct_frame, textvariable='Search')
+    search_value.set('')
+    search_entry = ttk.Entry(direct_frame, textvariable=search_value)
+    search_value.trace_add('write', basic_callback)
     search_entry.grid(column=1, row=1, columnspan=3, sticky=(W, E))
 
-    search_var = StringVar(direct_frame, 'Employee ID')
+    search_var.set('Employee ID')
     search_combo = ttk.Combobox(direct_frame,  state='readonly', textvariable=search_var)
+    search_var.trace_add('write', basic_callback)
     search_combo.grid(column=4, row=1)
     search_combo['values']=('Employee ID', 'First Name', 'Last Name', 'Position')
 
     search_image = PhotoImage(file='search.png')
-    search_button = ttk.Button(direct_frame, image=search_image, command=search)
+    print(search_var.get)
+    search_button = ttk.Button(direct_frame, image=search_image,
+                               command=lambda: search(search_value, search_var, db))
     reference_label= ttk.Label(image=search_image)
     reference_label.image = search_image
     search_button.grid(column=5, row=1)
 
     slide_canvas = Canvas(direct_frame)
-    slide_canvas.grid(column=1, row=6, sticky='news')
+    slide_canvas.grid(column=1,columnspan=10, row=6, sticky='news')
 
     sub_frame = ttk.Frame(slide_canvas)
     sub_frame.grid(column=0, columnspan=9, row=2, sticky=(N, S, E, W))
@@ -408,15 +417,16 @@ def employee_directory(employee, data):
     row_count = 1
     #loop should iterate through array of employees current loop structure for testing layout only
     horizon_sep = []
+    check_box = []
+    view_buttons = []
     for emp in data.employees:
         horizon_sep.append(ttk.Separator(sub_frame, orient=HORIZONTAL)
                            .grid(column=0, columnspan=17, row=row_count, sticky=(W, E)))
         row_count += 1
 
         employee_archive = emp.archived
-        archived_check = ttk.Checkbutton(sub_frame, onvalue='True', offvalue='False',
-                                         variable=employee_archive)
-        archived_check.grid(column=0, row=row_count)
+        check_box.append(ttk.Checkbutton(sub_frame, onvalue='True', offvalue='False',
+                                         variable=employee_archive).grid(column=0, row=row_count))
 
         first_name_label = ttk.Label(sub_frame, text=emp.first_name)
         first_name_label.grid(column=2, row=row_count, sticky=W)
@@ -433,9 +443,7 @@ def employee_directory(employee, data):
         phone_label = ttk.Label(sub_frame, text=emp.office_phone)
         phone_label.grid(column=12, row=row_count)
 
-        view_button = ttk.Button(sub_frame, text='View',
-                                 command=lambda: employee_info(db.find_employees(None, emp.id)))
-        view_button.grid(column=16, row=row_count)
+        view_buttons.append(view_employee(sub_frame, emp, db).grid(column=16, row=row_count))
         row_count += 1
 
     long_view = ttk.Scrollbar(slide_canvas, command=slide_canvas.yview)
@@ -501,7 +509,7 @@ def login(user_id, user_password):
     user = db.check_login(user_id, user_password)
 
     if user:
-        employee_info(user)
+        employee_info(user, user)
 
 #Logout removes the current user variable, and returns to the login screen
 def logout():
@@ -526,6 +534,11 @@ def pad_space():
     for child in root.winfo_children():
         for inner_child in child.winfo_children():
             inner_child.grid_configure(padx=5, pady=5)
+
+def view_employee(master, employee: database.Employee, data: database.Database):
+    """Used to create the view employee buttons in the loops for the directories"""
+    return ttk.Button(master, text='View', command=lambda:employee_info(
+        data.find_employees(None, employee.id)[0], user))
 
 def update_employee():
     """Save changes made to an employee record"""
@@ -569,6 +582,7 @@ def update_employee():
             if employee_pay_amount != changed_employee.commission:
                 changed_employee.commission = employee_pay_amount
         case _:
+            print(employee_classification.get)
             print('employee payment update error')
 
     #It seeems that pay_method doesn't exist as an employee attribute
@@ -584,8 +598,22 @@ def update_employee():
     return 0
 
 #Search employee directory based on currently selected criteria
-def search():
+def search(value, mode, data: database.Database):
     """Call and display the employee search results from database.py"""
+    val = str(value.get())
+
+    match mode.get():
+        case 'Employee ID':
+            employee_directory(user, data.find_employees(None, val))
+        case 'First Name':
+            employee_directory(user, data.find_employees(val))
+        case 'Last Name':
+            employee_directory(user, data.find_employees(val))
+        case 'Position':
+            employee_directory(user, data.find_employees(None, None, val))
+        case _:
+            print(mode.get())
+            print('Search mode error')
     return 0
 
 #Display login is called on program start
